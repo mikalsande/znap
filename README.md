@@ -46,12 +46,18 @@ install
 
 FreeBSD
 -------
-    cp znap.sh /usr/local/sbin/
-    chmod 555 /usr/local/sbin/znap.sh
-    cp znap.conf /usr/local/etc/
+
+```
+cp znap.sh /usr/local/sbin/
+chmod 555 /usr/local/sbin/znap.sh
+cp znap.conf /usr/local/etc/
+```
 
 Then add this line to /etc/crontab
-    1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
+
+```
+1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
+```
 
 Other
 -----

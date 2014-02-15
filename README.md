@@ -45,6 +45,7 @@ or if anyone asks nicely.
 - make different types of snapshots configurable. Be able to enable / disable daily, 
   weekly, monthly snapshots.
 - quarterly snapshots.
+- per pool configuration. Put them in separate files in znap.d directory.
 
 
 install

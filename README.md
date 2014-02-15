@@ -12,6 +12,7 @@ Goals and ideas for znap:
 - written in sh. portable, no dependencies and most Unix admins understand it.
 - code should be easy to read and understand.
 - perform daily, weekly and monthly snapshots.
+- snapshots are done recursively from the root of a zpool
 - one snapshot is taken every day. Monthly snapshots take presedence over weekly 
   snapshots which take presedence over daily snapshots.
 - snapshot-lifetime is given in days. Snapshots are destroyed based on how many 
@@ -19,10 +20,12 @@ Goals and ideas for znap:
 - creation-date is included in the snapshot name. The pattern they follow is 
   date_scriptname_type, eg. 20140211_znap_daily. This is both computer and 
   human friendly.
+- snapshots are removed with deferred destroy to make sure the script works with 
+  zfs holds.
 - scrubbing is performed on the same weekday every month. This fits into a 
   weekly work schedule, eg. scrub the first sunday of every month.
-- all time related calculations are done by date(1), znap only compares some 
-  integers to figure out when a snapshot is too old.
+- all time related calculations are done by date(1), znap only compares integers 
+  to figure out when a snapshot is too old.
 - have a sane default config.
 
 
@@ -39,6 +42,9 @@ or if anyone asks nicely.
   be on, standard now is the first week. Enable configuration for weekly scrubbing, 
   maybe even scrubbing every two weeks, three weeks, etc.
 - generalize the script so that it can apply to datasets and not only whole pools.
+- make different types of snapshots configurable. Be able to enable / disable daily, 
+  weekly, monthly snapshots.
+- quarterly snapshots.
 
 
 install
@@ -48,9 +54,7 @@ FreeBSD
 -------
 
 ```
-cp znap.sh /usr/local/sbin/
-chmod 555 /usr/local/sbin/znap.sh
-cp znap.conf /usr/local/etc/
+sh ./install.sh install
 ```
 
 Then add this line to /etc/crontab
@@ -59,10 +63,11 @@ Then add this line to /etc/crontab
 1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```
 
-Other
+other
 -----
 Not implemented but ideas, requests, diffs, etc. will be happily accepted.
 
+
 license
--------
+=======
 Beer-ware (revision 42)

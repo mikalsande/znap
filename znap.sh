@@ -29,13 +29,15 @@
 # 1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
 #
 
+set -u
+
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 ########################
 # Script Configuration #
 ########################
 
-CONFIG_FILE='/usr/local/etc/znap.conf'
+CONFIG_FILE='./znap.conf'
 
 # If config exists, source it
 if [ -r "$CONFIG_FILE" ]
@@ -56,7 +58,7 @@ MONTHLY_LIFETIME=${MONTHLY_LIFETIME:='84'}
 
 SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 
-WEEKLY_DAY=${WEEKLY_DAY:='1'}
+WEEKLY_DAY=${WEEKLY_DAY:='7'}
 MONTHLY_DAY=${MONTHLY_DAY:='1'}
 SCRUB_DAY=${SCRUB_DAY:='1'}
 
@@ -69,9 +71,6 @@ ONLINE_STRING='state: ONLINE'
 #########################
 # Runtime configuration #
 #########################
-
-# pool to snapshot
-POOL=$1
 
 # find the threshold date for destroying snapshots
 DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d')"
@@ -96,9 +95,17 @@ then
 fi
 
 # Is a poolname given?
-if [ -z "$POOL" ]
+if [ "$#" -eq 0 ]
 then
 	echo "$0 - Please enter a poolname"
+	exit 2
+fi
+POOL="$1"
+
+# Are weekly and monthly snapshots on different days?
+if [ "$WEEKLY_DAY" -eq "$MONTHLY_DAY"  ]
+then
+	echo "$0 - Weekly and monthly snapshots should be on different weekdays, exiting"
 	exit 2
 fi
 
@@ -182,12 +189,14 @@ destroy_old ()
 # the default is daily
 SNAPSHOT_TYPE="daily"
 
+# Is it time for a weekly snapshot?
 if [ "$TODAY_DAY_OF_WEEK" = "$WEEKLY_DAY" ]
 then
 	SNAPSHOT_TYPE="weekly"
 fi
 
-if [ "$TODAY_DAY_OF_MONTH" = "$MONTHLY_DAY" ]
+# Is it time for a monthly snapshot?
+if [ "$TODAY_DAY_OF_MONTH" -le "7" -a "$TODAY_DAY_OF_WEEK" -eq "$MONTHLY_DAY" ]
 then
 	SNAPSHOT_TYPE="monthly"
 fi
@@ -225,7 +234,7 @@ destroy_old 'monthly'
 # Monthly scrub #
 #################
 
-# perform scrub
+# perform scrub, in the first week of the month
 if [ "$TODAY_DAY_OF_MONTH" -le "7" -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]
 then
 	zpool scrub "$POOL"

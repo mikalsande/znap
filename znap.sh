@@ -50,8 +50,6 @@ fi
 
 # set standard config just in case something
 # is commented out in the config file
-SCRIPT_ENABLED=${SCRIPT_ENABLED:='no'}
-
 DAILY_LIFETIME=${DAILY_LIFETIME:='7'}
 WEEKLY_LIFETIME=${WEEKLY_LIFETIME:='28'}
 MONTHLY_LIFETIME=${MONTHLY_LIFETIME:='84'}
@@ -86,13 +84,6 @@ TODAY_DAY_OF_MONTH="$(date '+%d')"
 #################
 # Runtime tests #
 #################
-
-# Is the script enabled?
-if [ "$SCRIPT_ENABLED" != 'yes' ]
-then
-	echo "$0 - This script is disabled. Set SCRIPT_ENABLED='yes' to enable it."
-	exit 2
-fi
 
 # Is a poolname given?
 if [ "$#" -eq 0 ]

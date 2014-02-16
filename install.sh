@@ -33,8 +33,6 @@ znap_install()
 	cp ./znap.conf "$CONFIG_PATH"
 	chmod 640 "$CONFIG"
 
-	echo
-	echo "Enable the script by setting SCRIPT_ENABLED='yes' in $CONFIG"
 	echo 
 	echo "Add this line to /etc/crontab to run the script daily"
 	echo "1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>"

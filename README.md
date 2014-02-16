@@ -10,7 +10,8 @@ please tell me about it :)
 
 Goals and ideas for znap:
 - written in sh. portable, no dependencies and most Unix admins understand it.
-- code should be easy to read and understand.
+- code should be easy to read and understand to such an extent that it can be 
+  trusted to not do anything surprising.
 - perform daily, weekly and monthly snapshots.
 - snapshots are done recursively from the root of a zpool
 - one snapshot is taken every day. Monthly snapshots take presedence over weekly 
@@ -33,7 +34,7 @@ unimplemented ideas
 ===================
 I have some ideas for extending the script. Might implement them if I need them myself 
 or if anyone asks nicely.
-- destroy snapshots with used = 0. Gets rid of unecessary snapshots. This process 
+- destroy snapshots with used = 0. Gets rid of unnecessary snapshots. This process 
   should start with the oldest snapshots, ignore monthly snapshots and ignore 
   the newest snapshot.
 - implement hourly snapshotting, preferably with a separate script to keep things 
@@ -72,3 +73,8 @@ Not implemented but ideas, requests, diffs, etc. will be happily accepted.
 license
 =======
 Beer-ware (revision 42)
+
+
+todo
+====
+- write a proper Makefile

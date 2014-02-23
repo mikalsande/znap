@@ -28,6 +28,7 @@ Goals and ideas for znap:
 - all time related calculations are done by date(1), znap only compares integers 
   to figure out when a snapshot is too old.
 - have a sane default config.
+- use zfs delegation to allow the script to run as an unprivileged user
 
 
 unimplemented ideas
@@ -52,22 +53,51 @@ or if anyone asks nicely.
 install
 =======
 
-FreeBSD
--------
-
 ```
 sh ./install.sh install
 ```
 
-Then add this line to /etc/crontab
+Without delegation
+------------------
+
+Add this line to /etc/crontab
 
 ```
 1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```
 
-other
------
-Not implemented but ideas, requests, diffs, etc. will be happily accepted.
+With delegation
+---------------
+
+```
+adduser
+  Username: _znap
+  Full name: znap unprivileged user
+  Uid (Leave empty for default): 4000
+  Login group [_znap]:
+  Login group is _znap. Invite _znap into other groups? []:
+  Login class [default]:
+  Shell (sh csh tcsh git-shell nologin) [sh]: nologin
+  Home directory [/home/_znap]: /nonexistent
+  Home directory permissions (Leave empty for default):
+  Use password-based authentication? [yes]: no
+  Lock out the account after creation? [no]:
+
+zfs allow -u _znap destroy,mount,snapshot <pool> 
+```
+
+Add this line to /etc/crontab
+
+```
+1   2   *   *   *   _znap /bin/sh /usr/local/sbin/znap.sh <poolname>
+```
+
+Supported OS
+------------
+Currently the only supported OS is FreeBSD because its what I run it on. 
+It should be trivial to adapt it for use on other Unix platforms.
+
+Ideas, requests, diffs, etc. will be happily accepted.
 
 
 license
@@ -78,3 +108,4 @@ Beer-ware (revision 42)
 todo
 ====
 - write a proper Makefile
+- make it a FreeBSD port and get it into the ports tree

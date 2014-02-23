@@ -30,6 +30,7 @@
 #
 
 set -u
+set -x
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
@@ -37,7 +38,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # Script Configuration #
 ########################
 
-CONFIG_FILE='./znap.conf'
+CONFIG_FILE='/usr/local/etc/znap.conf'
 
 # If config exists, source it
 if [ -r "$CONFIG_FILE" ]
@@ -86,7 +87,7 @@ TODAY_DAY_OF_MONTH="$(date '+%d')"
 #################
 
 # Is a poolname given?
-if [ "$#" -eq 0 ]
+if [ "$#" -eq '0' ]
 then
 	echo "$0 - Please enter a poolname"
 	exit 2
@@ -101,8 +102,8 @@ then
 fi
 
 # Does the pool exist?
-zpool list "$POOL" > /dev/null 2>1
-if [ "$?" -ne "0" ]
+zpool list "$POOL" > /dev/null 2>&1
+if [ "$?" -ne '0' ]
 then
 	echo "$0 - No such pool: $POOL"
 	exit 2
@@ -110,7 +111,7 @@ fi
 
 # Is there a scrub going on?
 zpool status "$POOL" | grep "$SCRUB_STRING" > /dev/null
-if [ "$?" -eq "0" ]
+if [ "$?" -eq '0' ]
 then
 	echo "$0 - Scrub in progress, exiting"
 	exit 1
@@ -118,7 +119,7 @@ fi
 
 # Is there resilver going on?
 zpool status "$POOL" | grep "$RESILVER_STRING" > /dev/null
-if [ "$?" -eq "0" ]
+if [ "$?" -eq '0' ]
 then
 	echo "$0 - Resilver in progress, exiting"
 	exit 1
@@ -126,7 +127,7 @@ fi
 
 # Is the pool in the ONLINE state?
 zpool status "$POOL" | grep "$ONLINE_STRING" > /dev/null
-if [ "$?" -ne "0" ]
+if [ "$?" -ne '0' ]
 then
 	echo "$0 - Pool isn't in ONLINE state, exiting"
 	exit 1
@@ -178,25 +179,25 @@ destroy_old ()
 
 # decide which type the snapshots will be created
 # the default is daily
-SNAPSHOT_TYPE="daily"
+SNAPSHOT_TYPE='daily'
 
 # Is it time for a weekly snapshot?
 if [ "$TODAY_DAY_OF_WEEK" = "$WEEKLY_DAY" ]
 then
-	SNAPSHOT_TYPE="weekly"
+	SNAPSHOT_TYPE='weekly'
 fi
 
 # Is it time for a monthly snapshot?
-if [ "$TODAY_DAY_OF_MONTH" -le "7" -a "$TODAY_DAY_OF_WEEK" -eq "$MONTHLY_DAY" ]
+if [ "$TODAY_DAY_OF_MONTH" -le '7' -a "$TODAY_DAY_OF_WEEK" -eq "$MONTHLY_DAY" ]
 then
-	SNAPSHOT_TYPE="monthly"
+	SNAPSHOT_TYPE='monthly'
 fi
 
 SNAPSHOT="${TODAY_DATE}_${SNAPSHOT_NAME}_${SNAPSHOT_TYPE}"
 
 # Is there already a snapshot for today?
 zfs list -t snapshot | grep "$SNAPSHOT" > /dev/null
-if [ "$?" -eq "0" ]
+if [ "$?" -eq '0' ]
 then
 	echo "$0 - Todays snapshot already exists, exiting"
 	echo "This script should only be run once per day"
@@ -226,7 +227,7 @@ destroy_old 'monthly'
 #################
 
 # perform scrub, in the first week of the month
-if [ "$TODAY_DAY_OF_MONTH" -le "7" -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]
+if [ "$TODAY_DAY_OF_MONTH" -le '7' -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]
 then
 	zpool scrub "$POOL"
 fi

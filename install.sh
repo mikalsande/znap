@@ -31,11 +31,17 @@ znap_install()
 	chmod 555 "$SCRIPT"
 
 	cp ./znap.conf "$CONFIG_PATH"
-	chmod 640 "$CONFIG"
+	chmod 644 "$CONFIG"
 
 	echo 
+	echo "Without delegation"
 	echo "Add this line to /etc/crontab to run the script daily"
 	echo "1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>"
+	echo
+	echo
+	echo "With delegation (remeber to add the user)"
+	echo "Add this line to /etc/crontab to run the script daily"
+	echo "1   2   *   *   *   _znap  /bin/sh /usr/local/sbin/znap.sh <poolname>"
 }
 
 znap_remove()

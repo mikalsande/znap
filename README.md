@@ -5,8 +5,8 @@ znap is a ZFS snapshot management and peridic scrubbing script written in /bin/s
 
 goals
 =====
-I write this for my personal usage. If anyone else finds this useful thats a big bonus, 
-please tell me about it :) 
+I write this for my personal usage and for some servers I help administer. If anyone 
+else finds this useful thats a big bonus, please tell me about it :) 
 
 Goals and ideas for znap:
 - written in sh. portable, no dependencies and most Unix admins understand it.
@@ -35,9 +35,6 @@ unimplemented ideas
 ===================
 I have some ideas for extending the script. Might implement them if I need them myself 
 or if anyone asks nicely.
-- destroy snapshots with used = 0. Gets rid of unnecessary snapshots. This process 
-  should start with the oldest snapshots, ignore monthly snapshots and ignore 
-  the newest snapshot.
 - implement hourly snapshotting, preferably with a separate script to keep things 
   simple
 - make scrubbing more configurable. Configure which week in a month the scrub should 
@@ -48,6 +45,9 @@ or if anyone asks nicely.
   weekly, monthly snapshots.
 - quarterly snapshots.
 - per pool configuration. Put them in separate files in znap.d directory.
+- be able to make snapshots manually in addition to the daily ones. They could be 
+  called admin snapshots and live for a year. It would be up to the admin to destroy 
+  these snapshots.
 
 
 install
@@ -63,7 +63,7 @@ Without delegation
 Add this line to /etc/crontab
 
 ```
-1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
+2   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```
 
 With delegation
@@ -89,7 +89,7 @@ zfs allow -u _znap destroy,mount,snapshot <pool>
 Add this line to /etc/crontab
 
 ```
-1   2   *   *   *   _znap /bin/sh /usr/local/sbin/znap.sh <poolname>
+2   2   *   *   *   _znap /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```
 
 Supported OS

@@ -30,7 +30,6 @@
 #
 
 set -u
-set -x
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 

@@ -33,37 +33,36 @@ set -u
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
-########################
-# Script Configuration #
-########################
-
-CONFIG_FILE='/usr/local/etc/znap.conf'
-
-# If config exists, source it
-if [ -r "$CONFIG_FILE" ]
-then
-	. $CONFIG_FILE
-else
-	echo "$0 - Couldn't read config file at $CONFIG_FILE, exiting"
-	exit 2
-fi
-
-# set standard config just in case something
-# is commented out in the config file
-DAILY_LIFETIME=${DAILY_LIFETIME:='7'}
-WEEKLY_LIFETIME=${WEEKLY_LIFETIME:='28'}
-MONTHLY_LIFETIME=${MONTHLY_LIFETIME:='84'}
-
-SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
-
-WEEKLY_DAY=${WEEKLY_DAY:='7'}
-MONTHLY_DAY=${MONTHLY_DAY:='1'}
-SCRUB_DAY=${SCRUB_DAY:='1'}
+# Configuration files
+CONFIG='./'
+CONFIG_FILE="${CONFIG}/znap.conf"
+CONFIG_DIR="${CONFIG}/znap.d"
+FOUND_CONFIG='no'
 
 # grep strings, used to grep for different pool states
 SCRUB_STRING='scrub in progress since'
 RESILVER_STRING='resilver in progress since'
 ONLINE_STRING='state: ONLINE'
+
+
+########################
+# Script Configuration #
+########################
+
+# set standard config just in case something is commented out in the 
+# config file the lines below are configurables that can be set in a 
+# per pool config. 
+DAILY_LIFETIME=${DAILY_LIFETIME:='7'}
+WEEKLY_LIFETIME=${WEEKLY_LIFETIME:='28'}
+MONTHLY_LIFETIME=${MONTHLY_LIFETIME:='84'}
+
+# monday = 1, sunday = 7
+WEEKLY_DAY=${WEEKLY_DAY:='7'}
+MONTHLY_DAY=${MONTHLY_DAY:='1'}
+SCRUB_DAY=${SCRUB_DAY:='1'}
+
+# name that will be used and grepped for in snapshots
+SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 
 
 #########################
@@ -93,18 +92,40 @@ then
 fi
 POOL="$1"
 
-# Are weekly and monthly snapshots on different days?
-if [ "$WEEKLY_DAY" -eq "$MONTHLY_DAY"  ]
-then
-	echo "$0 - Weekly and monthly snapshots should be on different weekdays, exiting"
-	exit 2
-fi
-
 # Does the pool exist?
 zpool list "$POOL" > /dev/null 2>&1
 if [ "$?" -ne '0' ]
 then
 	echo "$0 - No such pool: $POOL"
+	exit 2
+fi
+
+# Is there a general config?
+if [ -r "$CONFIG_FILE" ]
+then
+	. $CONFIG_FILE
+	FOUND_CONFIG='yes'
+fi
+
+# Is there a specific config for this pool?
+POOL_CONFIG="${CONFIG_DIR}/${POOL}.conf"
+if [ -f "$POOL_CONFIG" ]
+then
+	. $POOL_CONFIG
+	FOUND_CONFIG='yes'
+fi
+
+# Exit if no configs were found
+if [ "$FOUND_CONFIG" != 'yes' ]
+then
+	echo "$0 - No config found at $CONFIG_FILE or $POOL_CONFIG, exiting"
+	exit 2
+fi
+
+# Are weekly and monthly snapshots on different days?
+if [ "$WEEKLY_DAY" -eq "$MONTHLY_DAY"  ]
+then
+	echo "$0 - Weekly and monthly snapshots should be on different weekdays, exiting"
 	exit 2
 fi
 

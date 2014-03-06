@@ -18,20 +18,20 @@ znap_configure()
 	esac
 
 	SCRIPT="${INSTALL_PATH}/znap.sh"
-	CONFIG="${CONFIG_PATH}/znap.conf"
 
-	sed "s|^CONFIG_FILE=.*|CONFIG_FILE='/usr/local/etc/znap.conf'|g" ./znap.sh > "$TEMPORARY_FILE"
+	sed "s|^CONFIG=.*|CONFIG='/usr/local/etc'|g" ./znap.sh > "$TEMPORARY_FILE"
 }
 
 znap_install()
 {
 	# Install
-	sed "s|^CONFIG_FILE=.*|CONFIG_FILE='${CONFIG}'|g" znap.sh > ./znap.sh_install
 	cp ./znap.sh_install "$SCRIPT"
 	chmod 555 "$SCRIPT"
 
 	cp ./znap.conf "$CONFIG_PATH"
-	chmod 644 "$CONFIG"
+	chmod 644 "${CONFIG_PATH}/znap.conf"
+
+	mkdir "${CONFIG_PATH}/znap.d"
 
 	echo 
 	echo "Without delegation"

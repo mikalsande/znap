@@ -29,6 +29,8 @@ Goals and ideas for znap:
   to figure out when a snapshot is too old.
 - have a sane default config.
 - use zfs delegation to allow the script to run as an unprivileged user
+- per pool configuration. Found under znap.d directory in the config path in
+  the form <poolname>.conf
 
 
 unimplemented ideas
@@ -44,7 +46,6 @@ or if anyone asks nicely.
 - make different types of snapshots configurable. Be able to enable / disable daily, 
   weekly, monthly snapshots.
 - quarterly snapshots.
-- per pool configuration. Put them in separate files in znap.d directory.
 - be able to make snapshots manually in addition to the daily ones. They could be 
   called admin snapshots and live for a year. It would be up to the admin to destroy 
   these snapshots.

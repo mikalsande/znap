@@ -216,7 +216,7 @@ fi
 SNAPSHOT="${TODAY_DATE}_${SNAPSHOT_NAME}_${SNAPSHOT_TYPE}"
 
 # Is there already a snapshot for today?
-zfs list -t snapshot | grep "$SNAPSHOT" > /dev/null
+zfs list -t snapshot | grep "^$POOL" | grep "$SNAPSHOT" > /dev/null
 if [ "$?" -eq '0' ]
 then
 	echo "$0 - Todays snapshot already exists, exiting"

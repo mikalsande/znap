@@ -31,6 +31,7 @@ Goals and ideas for znap:
 - use zfs delegation to allow the script to run as an unprivileged user
 - per pool configuration. Found under znap.d directory in the config path in
   the form <poolname>.conf
+- can perform weekly scrubbing if needed
 
 
 unimplemented ideas
@@ -40,8 +41,7 @@ or if anyone asks nicely.
 - implement hourly snapshotting, preferably with a separate script to keep things 
   simple
 - make scrubbing more configurable. Configure which week in a month the scrub should 
-  be on, standard now is the first week. Enable configuration for weekly scrubbing, 
-  maybe even scrubbing every two weeks, three weeks, etc.
+  be on, standard now is the first week.
 - generalize the script so that it can apply to datasets and not only whole pools.
 - make different types of snapshots configurable. Be able to enable / disable daily, 
   weekly, monthly snapshots.

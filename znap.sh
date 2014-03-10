@@ -64,6 +64,9 @@ SCRUB_DAY=${SCRUB_DAY:='1'}
 # name that will be used and grepped for in snapshots
 SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 
+# weekly instead of monthly scrub?
+WEEKLY_SCRUB=${WEEKLY_SCRUB:='no'}
+
 
 #########################
 # Runtime configuration #
@@ -245,6 +248,13 @@ destroy_old 'monthly'
 #################
 # Monthly scrub #
 #################
+
+# If weekly scrub is enabled
+if [ "$WEEKLY_SCRUB" = 'yes' -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]
+then
+	zpool scrub "$POOL"
+	exit 0
+fi
 
 # perform scrub, in the first week of the month
 if [ "$TODAY_DAY_OF_MONTH" -le '7' -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]

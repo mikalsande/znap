@@ -73,6 +73,7 @@ Home directory [/home/_znap]: /nonexistent
 Home directory permissions (Leave empty for default):
 Use password-based authentication? [yes]: no
 Lock out the account after creation? [no]:
+```
 
 Delegate the proper ZFS rights to the _znap user
 ```

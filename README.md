@@ -8,7 +8,7 @@ goals
 I write this for my personal usage and for some servers I help administer. If anyone 
 else finds this useful thats a big bonus, please tell me about it :) 
 
-Goals and ideas for znap:
+Goals and ideas for znap (in no particular order):
 - written in sh. portable, no dependencies and most Unix admins understand it.
 - code should be easy to read and understand to such an extent that it can be 
   trusted to not do anything surprising.
@@ -30,7 +30,7 @@ Goals and ideas for znap:
 - have a sane default config.
 - use zfs delegation to allow the script to run as an unprivileged user
 - per pool configuration. Found under znap.d directory in the config path in
-  the form <poolname>.conf
+  the form poolname.conf
 - can perform weekly scrubbing if needed
 
 
@@ -54,47 +54,42 @@ or if anyone asks nicely.
 install
 =======
 
+Configure and install the script
 ```
-sh ./install.sh install
-```
-
-Without delegation
-------------------
-
-Add this line to /etc/crontab
-
-```
-2   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
+# make install
 ```
 
-With delegation
----------------
-
+Add an unprivileged _znap user (example from FreeBSD)
 ```
-adduser
-  Username: _znap
-  Full name: znap unprivileged user
-  Uid (Leave empty for default): 4000
-  Login group [_znap]:
-  Login group is _znap. Invite _znap into other groups? []:
-  Login class [default]:
-  Shell (sh csh tcsh git-shell nologin) [sh]: nologin
-  Home directory [/home/_znap]: /nonexistent
-  Home directory permissions (Leave empty for default):
-  Use password-based authentication? [yes]: no
-  Lock out the account after creation? [no]:
+# adduser
+Username: _znap
+Full name: znap unprivileged user
+Uid (Leave empty for default): 65000
+Login group [_znap]:
+Login group is _znap. Invite _znap into other groups? []:
+Login class [default]:
+Shell (sh csh tcsh git-shell nologin) [sh]: nologin
+Home directory [/home/_znap]: /nonexistent
+Home directory permissions (Leave empty for default):
+Use password-based authentication? [yes]: no
+Lock out the account after creation? [no]:
 
-zfs allow -u _znap destroy,mount,snapshot <pool> 
+Delegate the proper ZFS rights to the _znap user
+```
+# zfs allow -u _znap destroy,mount,snapshot <pool> 
 ```
 
-Add this line to /etc/crontab
-
+Add a line to /etc/crontab (one per pool)
 ```
 2   2   *   *   *   _znap /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```
 
-Supported OS
-------------
+If you need different configs per pool just copy znap.conf into 
+znap.d and name it after your pool, ie. tank.conf
+
+
+Supported OSes
+--------------
 Currently the only supported OS is FreeBSD because its what I run it on. 
 It should be trivial to adapt it for use on other Unix platforms.
 
@@ -108,5 +103,4 @@ Beer-ware (revision 42)
 
 todo
 ====
-- write a proper Makefile
 - make it a FreeBSD port and get it into the ports tree

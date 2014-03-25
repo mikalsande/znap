@@ -7,7 +7,7 @@ configure:
 
 install: configure
 	install -C -o root -g wheel -m 555 ./znap.sh_install ${BIN_PATH}/znap.sh
-	install -C -o root -g wheel ./znap.conf ${CONFIG_PATH}
+	install -C -o root -g wheel -m 644 ./znap.conf ${CONFIG_PATH}
 	mkdir -p ${CONFIG_PATH}/znap.d
 
 clean:

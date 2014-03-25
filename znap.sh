@@ -7,12 +7,12 @@
 # this stuff is worth it, you can buy me a beer in return. Mikal Sande 
 # ----------------------------------------------------------------------------
 #
-# znap.sh - a zfs pool snapshot management and scrubbing script
+# znap.sh - a zfs pool snapshot management script
 # usage: znap.sh <pool>
 #
-# znap.sh is a simple zfs snapshot and scrub management script. It performs 
-# daily, weekly and monthly snapshots for a whole pool recursively and keeps 
-# the snapshots for a configurable amount of days.
+# znap.sh is a simple zfs snapshot management script. It performs daily, 
+# weekly and monthly snapshots for a whole pool recursively and keeps the 
+# snapshots for a configurable amount of days.
 #
 # This script only performs one snapshot of a pool per day, # if it is time 
 # for a weekly snapshot then a weekly snapshot will be created instead of a 
@@ -22,11 +22,11 @@
 # All date related functions are performed by date(1), this script only 
 # performs integer comparisons to determine when a snapshot is to too old.
 #
-# Scrubs are performed in the first week of every month. The day in the 
-# the week is configurable.
+# Scrubbing should be scheduled at a time after this script has run to 
+# ensure that snapshots aren't skipped due to scrubbing.
 #
 # Add this line to /etc/crontab to run the script daily
-# 1   2   *   *   *   root   /bin/sh /usr/local/sbin/znap.sh <poolname>
+# 1   2   *   *   *   _znap	/bin/sh /usr/local/sbin/znap.sh <poolname>
 #
 
 set -u
@@ -59,13 +59,9 @@ MONTHLY_LIFETIME=${MONTHLY_LIFETIME:='84'}
 # monday = 1, sunday = 7
 WEEKLY_DAY=${WEEKLY_DAY:='7'}
 MONTHLY_DAY=${MONTHLY_DAY:='1'}
-SCRUB_DAY=${SCRUB_DAY:='1'}
 
 # name that will be used and grepped for in snapshots
 SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
-
-# weekly instead of monthly scrub?
-WEEKLY_SCRUB=${WEEKLY_SCRUB:='no'}
 
 
 #########################
@@ -243,24 +239,6 @@ destroy_old 'weekly'
 
 # destroy old monthly snapshots
 destroy_old 'monthly'
-
-
-#################
-# Monthly scrub #
-#################
-
-# If weekly scrub is enabled
-if [ "$WEEKLY_SCRUB" = 'yes' -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]
-then
-	zpool scrub "$POOL"
-	exit 0
-fi
-
-# perform scrub, in the first week of the month
-if [ "$TODAY_DAY_OF_MONTH" -le '7' -a "$TODAY_DAY_OF_WEEK" -eq "$SCRUB_DAY" ]
-then
-	zpool scrub "$POOL"
-fi
 
 
 exit 0

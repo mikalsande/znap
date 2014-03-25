@@ -1,6 +1,6 @@
 znap
 ====
-znap is a ZFS snapshot management and peridic scrubbing script written in /bin/sh
+znap is a ZFS snapshot management script written in /bin/sh
 
 
 goals
@@ -23,15 +23,12 @@ Goals and ideas for znap (in no particular order):
   human friendly.
 - snapshots are removed with deferred destroy to make sure the script works with 
   zfs holds.
-- scrubbing is performed on the same weekday every month. This fits into a 
-  weekly work schedule, eg. scrub the first sunday of every month.
 - all time related calculations are done by date(1), znap only compares integers 
   to figure out when a snapshot is too old.
 - have a sane default config.
 - use zfs delegation to allow the script to run as an unprivileged user
 - per pool configuration. Found under znap.d directory in the config path in
   the form poolname.conf
-- can perform weekly scrubbing if needed
 
 
 unimplemented ideas
@@ -40,8 +37,6 @@ I have some ideas for extending the script. Might implement them if I need them 
 or if anyone asks nicely.
 - implement hourly snapshotting, preferably with a separate script to keep things 
   simple
-- make scrubbing more configurable. Configure which week in a month the scrub should 
-  be on, standard now is the first week.
 - generalize the script so that it can apply to datasets and not only whole pools.
 - make different types of snapshots configurable. Be able to enable / disable daily, 
   weekly, monthly snapshots.
@@ -84,9 +79,11 @@ Add a line to /etc/crontab (one per pool)
 ```
 2   2   *   *   *   _znap /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```
+Scrubs should be scheduled at a time after znap.sh has run to ensure 
+that snapshots aren't skipped because of scrubs.
 
 If you need different configs per pool just copy znap.conf into 
-znap.d and name it after your pool, ie. tank.conf
+/usr/local/etc/znap.d and name it after the pool, ie. tank.conf.
 
 
 Supported OSes

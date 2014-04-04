@@ -6,6 +6,7 @@ znap is a ZFS snapshot management script written in /bin/sh
 features
 ========
 I write this for my personal usage and for some servers I help administrate. 
+
 If anyone else finds this useful thats a big bonus, please tell me about it :) 
 
 Features and ideas for znap (in not very particular order):
@@ -13,26 +14,22 @@ Features and ideas for znap (in not very particular order):
 - code should be easy to read and understand to such an extent that it can be 
   trusted to not do anything surprising.
 - use zfs delegation to allow the script to run as an unprivileged user
-
 - perform daily, weekly and monthly snapshots. snapshot-lifetime is given in days. 
   Snapshots are destroyed based on how many days they have lived, not how many 
   snapshots there are.
 - one snapshot is taken every day. Monthly snapshots take presedence over weekly 
   snapshots which take presedence over daily snapshots.
 - snapshots are done recursively from the root of a zpool
-
 - creation-date is included in the snapshot name. The pattern they follow is 
   date_scriptname_type, eg. 20140211_znap_daily. This is both computer and 
   human friendly.
 - all time related calculations are done by date(1), znap only compares integers 
   to figure out when a snapshot is too old.
-
 - snapshots are removed with deferred destroy to make sure the script works with 
   zfs holds.
 - per pool configuration. Found under znap.d directory in the config path in
   the form poolname.conf
 - have a sane default config.
-
 - perform hourly snapshots, with a separate script. snapshot-lifetime is given 
   in hours.
 
@@ -81,7 +78,7 @@ Delegate the proper ZFS rights to the _znap user
 # zfs allow -u _znap destroy,mount,snapshot <pool> 
 ```
 
-For daily snapshots, add a line to /etc/crontab (one per pool)
+For daily, weekly, and monthly snapshots, add a line to /etc/crontab (one per pool)
 ```
 2   2   *   *   *   _znap /bin/sh /usr/local/sbin/znap.sh <poolname>
 ```

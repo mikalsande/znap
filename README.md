@@ -47,6 +47,7 @@ or if anyone asks nicely.
   these snapshots.
 - user logger(1) to log error conditions.
 - add cron mail option so output can be mailed to a configurable email.
+- add a script to do replication with zfs send / receive
 
 
 install

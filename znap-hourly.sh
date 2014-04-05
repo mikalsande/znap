@@ -25,6 +25,8 @@
 # Scrubbing should be scheduled at a time after this script has run to 
 # ensure that snapshots aren't skipped due to scrubbing.
 #
+# This script should be scheduled a after znap.sh.
+#
 # Add this line to /etc/crontab to run the script daily
 # 7   *   *   *   *   _znap	/bin/sh /usr/local/sbin/znap-hourly.sh <poolname>
 #
@@ -87,6 +89,13 @@ if [ "$?" -ne '0' ]
 then
 	echo "$0 - No such pool: $POOL"
 	exit 2
+fi
+
+# Skip snapshot if znap.sh has taken a snapshot this hour
+zfs list -t snapshot | grep "^$POOL" | grep "${TIME_NOW}_${SNAPSHOT_NAME}_" > /dev/null
+if [ "$?" -eq '1' ]
+then
+        exit 0
 fi
 
 # Is there a general config?

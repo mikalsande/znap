@@ -22,9 +22,6 @@
 # All date related functions are performed by date(1), this script only 
 # performs integer comparisons to determine when a snapshot is to too old.
 #
-# Scrubbing should be scheduled at a time after this script has run to 
-# ensure that snapshots aren't skipped due to scrubbing.
-#
 # Add this line to /etc/crontab to run the script daily
 # 1   2   *   *   *   _znap	/bin/sh /usr/local/sbin/znap.sh <poolname>
 #
@@ -38,11 +35,6 @@ CONFIG='./'
 CONFIG_FILE="${CONFIG}/znap.conf"
 CONFIG_DIR="${CONFIG}/znap.d"
 FOUND_CONFIG='no'
-
-# grep strings, used to grep for different pool states
-SCRUB_STRING='scrub in progress since'
-RESILVER_STRING='resilver in progress since'
-ONLINE_STRING='state: ONLINE'
 
 
 ########################
@@ -99,6 +91,16 @@ then
 	exit 2
 fi
 
+# Is the pool in the FAULTED state?
+zpool status "$POOL" | grep 'state: FAULTED' > /dev/null
+if [ "$?" -eq '0' ]
+then
+        echo "$0 - Pool is in the FAULTED state, exiting"
+        echo
+        zfs status "$POOL"
+        exit 1
+fi
+
 # Is there a general config?
 if [ -r "$CONFIG_FILE" ]
 then
@@ -126,30 +128,6 @@ if [ "$WEEKLY_DAY" -eq "$MONTHLY_DAY"  ]
 then
 	echo "$0 - Weekly and monthly snapshots should be on different weekdays, exiting"
 	exit 2
-fi
-
-# Is there a scrub going on?
-zpool status "$POOL" | grep "$SCRUB_STRING" > /dev/null
-if [ "$?" -eq '0' ]
-then
-	echo "$0 - Scrub in progress, exiting"
-	exit 1
-fi
-
-# Is there resilver going on?
-zpool status "$POOL" | grep "$RESILVER_STRING" > /dev/null
-if [ "$?" -eq '0' ]
-then
-	echo "$0 - Resilver in progress, exiting"
-	exit 1
-fi
-
-# Is the pool in the ONLINE state?
-zpool status "$POOL" | grep "$ONLINE_STRING" > /dev/null
-if [ "$?" -ne '0' ]
-then
-	echo "$0 - Pool isn't in ONLINE state, exiting"
-	exit 1
 fi
 
 

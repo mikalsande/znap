@@ -19,16 +19,16 @@ Features and ideas for znap (in not very particular order):
   snapshots there are.
 - one snapshot is taken every day. Monthly snapshots take presedence over weekly 
   snapshots which take presedence over daily snapshots.
-- snapshots are done recursively from the root of a zpool
+- snapshots are done recursively from the root of the zpool
 - creation-date is included in the snapshot name. The pattern they follow is 
-  date_scriptname_type, eg. 20140211_znap_daily. This is both computer and 
-  human friendly.
+  date_scriptname_type, eg. 2014021102_znap_daily. This is both computer and 
+  human friendly. The time format is yyyymmddhh.
 - all time related calculations are done by date(1), znap only compares integers 
   to figure out when a snapshot is too old.
 - snapshots are removed with deferred destroy to make sure the script works with 
   zfs holds.
-- per pool configuration. Found under znap.d directory in the config path in
-  the form poolname.conf
+- per pool configuration. Found under znap.d directory in the config path. 
+  the configuration files are named like tank.conf
 - have a sane default config.
 - perform hourly snapshots, with a separate script. snapshot-lifetime is given 
   in hours.
@@ -46,8 +46,8 @@ or if anyone asks nicely.
   called admin snapshots and live for a year. It would be up to the admin to destroy 
   these snapshots.
 - user logger(1) to log error conditions.
-- add cron mail option so output can be mailed to a configurable email.
-- add a script to do replication with zfs send / receive
+- add cron MAILTO variable so script output can be mailed to a configurable email.
+- add a script to do remote replication with zfs send / receive
 
 
 install
@@ -88,8 +88,6 @@ For hourly snapshots, add a line to /etc/crontab (one per pool)
 ```
 7   *   *   *   *   _znap /bin/sh /usr/local/sbin/znap-hourly.sh <poolname>
 ```
-Scrubs should be scheduled at a time after znap.sh and znap-hourly.sh has 
-run to ensure that snapshots aren't skipped because of scrubs.
 
 If you need different configs per pool just copy znap.conf into 
 /usr/local/etc/znap.d/ and name it after the pool, ie. tank.conf.

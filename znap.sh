@@ -69,12 +69,12 @@ SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 #########################
 
 # find the threshold date for destroying snapshots
-DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d')"
-WEEKLY_DESTROY_DATE="$(date -v -${WEEKLY_LIFETIME}d '+%Y%m%d')"
-MONTHLY_DESTROY_DATE="$(date -v -${MONTHLY_LIFETIME}d '+%Y%m%d')"
+DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d%H')"
+WEEKLY_DESTROY_DATE="$(date -v -${WEEKLY_LIFETIME}d '+%Y%m%d%H')"
+MONTHLY_DESTROY_DATE="$(date -v -${MONTHLY_LIFETIME}d '+%Y%m%d%H')"
 
 # todays date, day of week and day of month
-TODAY_DATE="$(date '+%Y%m%d')"
+TODAY_DATE="$(date '+%Y%m%d%H')"
 TODAY_DAY_OF_WEEK="$(date '+%u')"
 TODAY_DAY_OF_MONTH="$(date '+%d')"
 

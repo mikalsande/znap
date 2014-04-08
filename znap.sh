@@ -55,20 +55,11 @@ MONTHLY_DAY=${MONTHLY_DAY:='1'}
 # name that will be used and grepped for in snapshots
 SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 
-
-#########################
-# Runtime configuration #
-#########################
-
-# find the threshold date for destroying snapshots
-DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d%H')"
-WEEKLY_DESTROY_DATE="$(date -v -${WEEKLY_LIFETIME}d '+%Y%m%d%H')"
-MONTHLY_DESTROY_DATE="$(date -v -${MONTHLY_LIFETIME}d '+%Y%m%d%H')"
-
-# todays date, day of week and day of month
-TODAY_DATE="$(date '+%Y%m%d%H')"
-TODAY_DAY_OF_WEEK="$(date '+%u')"
-TODAY_DAY_OF_MONTH="$(date '+%d')"
+# ratelimit destroyal of old snapshots to make
+# sure that we don't delete all snapshots,
+# theis determines the maximum number of snapshots
+# the script destroys each time it is executed.
+DESTROY_LIMIT=${DESTROY_LIMIT:='2'}
 
 
 #################
@@ -131,6 +122,21 @@ then
 fi
 
 
+#########################
+# Runtime configuration #
+#########################
+
+# find the threshold date for destroying snapshots
+DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d%H')"
+WEEKLY_DESTROY_DATE="$(date -v -${WEEKLY_LIFETIME}d '+%Y%m%d%H')"
+MONTHLY_DESTROY_DATE="$(date -v -${MONTHLY_LIFETIME}d '+%Y%m%d%H')"
+
+# todays date, day of week and day of month
+TODAY_DATE="$(date '+%Y%m%d%H')"
+TODAY_DAY_OF_WEEK="$(date '+%u')"
+TODAY_DAY_OF_MONTH="$(date '+%d')"
+
+
 #############
 # Functions #
 #############
@@ -160,11 +166,18 @@ destroy_old ()
 		| grep "^${POOL}" | grep "_${SNAPSHOT_NAME}_${TYPE}" \
 		| grep --only-matching '@.*' | sort | uniq )
 	do
+		# exit if we have already destroyed enough snapshots
+		if [ "$destroyed" -eq "$DESTROY_LIMIT" ]
+		then
+			exit 0
+		fi
+
 		snapshot_date=$( echo "$snapshot" | tr -d '@' | grep -o '^[[:digit:]]*' )
 
 		if [ "$snapshot_date" -lt "$DESTROY_DATE" ]
 		then
 			zfs destroy -d -r "${POOL}${snapshot}"
+			destroyed=$(( $destroyed + 1 ))
 		fi
 	done
 }
@@ -192,15 +205,6 @@ fi
 
 SNAPSHOT="${TODAY_DATE}_${SNAPSHOT_NAME}_${SNAPSHOT_TYPE}"
 
-# Is there already a snapshot for today?
-zfs list -t snapshot | grep "^$POOL" | grep "$SNAPSHOT" > /dev/null
-if [ "$?" -eq '0' ]
-then
-	echo "$0 - Todays snapshot already exists, exiting"
-	echo "This script should only be run once per day"
-	exit 1
-fi
-
 # make the snapshot
 zfs snapshot -r "${POOL}@${SNAPSHOT}"
 
@@ -208,6 +212,9 @@ zfs snapshot -r "${POOL}@${SNAPSHOT}"
 ########################
 # Delete old snapshots #
 ########################
+
+# destroyed snapshot count
+destroyed='0'
 
 # destroy old daily snapshots
 destroy_old 'daily'

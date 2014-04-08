@@ -32,6 +32,9 @@ Features and ideas for znap (in not very particular order):
 - have a sane default config.
 - perform hourly snapshots, with a separate script. snapshot-lifetime is given 
   in hours.
+- ratelimits destroal of old snapshots to make sure that the script doesn't 
+  destroy too many old snapshots at a time. The script takes one snapshot 
+  every time it is run, and it destroys maximum two old snapshots by default.
 
 
 unimplemented ideas

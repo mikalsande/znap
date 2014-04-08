@@ -51,16 +51,11 @@ HOURLY_LIFETIME=${HOURLY_LIFETIME:='24'}
 # name that will be used and grepped for in snapshots
 SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 
-
-#########################
-# Runtime configuration #
-#########################
-
-# find the threshold date for destroying snapshots
-HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H')"
-
-# the date and hour when the script is run
-TIME_NOW="$(date '+%Y%m%d%H')"
+# ratelimit destroyal of old snapshots to make
+# sure that we don't delete all snapshots,
+# theis determines the maximum number of snapshots
+# the script destroys each time it is executed.
+DESTROY_LIMIT=${DESTROY_LIMIT:='2'}
 
 
 #################
@@ -93,13 +88,6 @@ then
 	exit 1
 fi
 
-# Skip snapshot if znap.sh has taken a snapshot this hour
-zfs list -t snapshot | grep "^$POOL" | grep "${TIME_NOW}_${SNAPSHOT_NAME}_" > /dev/null
-if [ "$?" -eq '0' ]
-then
-        exit 0
-fi
-
 # Is there a general config?
 if [ -r "$CONFIG_FILE" ]
 then
@@ -123,6 +111,17 @@ then
 fi
 
 
+#########################
+# Runtime configuration #
+#########################
+
+# find the threshold date for destroying snapshots
+HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H')"
+
+# the date and hour when the script is run
+TIME_NOW="$(date '+%Y%m%d%H')"
+
+
 ######################
 # Make new snapshots #
 ######################
@@ -138,16 +137,26 @@ zfs snapshot -r "${POOL}@${SNAPSHOT}"
 # Delete old snapshots #
 ########################
 
+# destroyed snapshot count
+destroyed='0'
+
 # destroy old hourly snapshots
 for snapshot in $( zfs list -H -t snapshot -o name \
 	| grep "^${POOL}" | grep "_${SNAPSHOT_NAME}_hourly" \
 	| grep --only-matching '@.*' | sort | uniq )
 do
+	# exit if we have already destroyed enough snapshots
+	if [ "$destroyed" -eq "$DESTROY_LIMIT" ]
+	then
+		exit 0
+	fi
+
 	snapshot_date=$( echo "$snapshot" | tr -d '@' | grep -o '^[[:digit:]]*' )
 
 	if [ "$snapshot_date" -lt "$HOURLY_DESTROY_TIME" ]
 	then
 		zfs destroy -d -r "${POOL}${snapshot}"
+		destroyed=$(( $destroyed + 1 ))
 	fi
 done
 

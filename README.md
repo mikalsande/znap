@@ -2,13 +2,11 @@ znap
 ====
 znap is a ZFS snapshot management script written in /bin/sh
 
-
-features
-========
 I write this for my personal usage and for some servers I help administrate. 
-
 If anyone else finds this useful thats a big bonus, please tell me about it :) 
 
+Features
+========
 Features and ideas for znap (in not very particular order):
 - written in sh. portable, no dependencies and most Unix admins understand it.
 - code should be easy to read and understand to such an extent that it can be 
@@ -19,7 +17,7 @@ Features and ideas for znap (in not very particular order):
   snapshots there are.
 - one snapshot is taken every day. Monthly snapshots take presedence over weekly 
   snapshots which take presedence over daily snapshots.
-- snapshots are done recursively from the root of the zpool
+- snapshots are done recursively from the root of a zpool
 - creation-date is included in the snapshot name. The pattern they follow is 
   date_scriptname_type, eg. 2014021102_znap_daily. This is both computer and 
   human friendly. The time format is yyyymmddhh.
@@ -29,15 +27,17 @@ Features and ideas for znap (in not very particular order):
   zfs holds.
 - per pool configuration. Found under znap.d directory in the config path. 
   the configuration files are named like tank.conf
-- have a sane default config.
-- perform hourly snapshots, with a separate script. snapshot-lifetime is given 
-  in hours.
-- ratelimits destroal of old snapshots to make sure that the script doesn't 
+- perform hourly snapshots with a separate script. snapshot-lifetime is given 
+  in hours. Snapshots are destroyed based on how many hours they have lived, 
+  not how many snasphots there are.
+- ratelimits destroyal of old snapshots to make sure that the script doesn't 
   destroy too many old snapshots at a time. The script takes one snapshot 
-  every time it is run, and it destroys maximum two old snapshots by default.
+  every time it is run, and it destroys maximum two old snapshots at a time 
+  by default.
+- have a sane default config.
 
 
-unimplemented ideas
+Unimplemented ideas
 ===================
 I have some ideas for extending the script. Might implement them if I need them myself 
 or if anyone asks nicely.
@@ -53,7 +53,7 @@ or if anyone asks nicely.
 - add a script to do remote replication with zfs send / receive
 
 
-install
+Install
 =======
 
 Configure and install the script
@@ -104,11 +104,11 @@ It should be trivial to adapt it for use on other Unix platforms.
 Ideas, requests, diffs, etc. will be happily accepted.
 
 
-license
+License
 =======
 Beer-ware (revision 42)
 
 
-todo
+TODO
 ====
 - make it a FreeBSD port

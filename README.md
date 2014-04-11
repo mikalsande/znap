@@ -1,6 +1,6 @@
 znap
 ====
-znap is a ZFS snapshot management script written in /bin/sh
+znap is a set of ZFS snapshot management and replication scripts written in /bin/sh
 
 I write this for my personal usage and for some servers I help administrate. 
 If anyone else finds this useful thats a big bonus, please tell me about it :) 
@@ -8,7 +8,7 @@ If anyone else finds this useful thats a big bonus, please tell me about it :)
 Features
 ========
 Features and ideas for znap (in not very particular order):
-- written in sh. portable, no dependencies and most Unix admins understand it.
+- written in sh. portable, most Unix admins understand it.
 - code should be easy to read and understand to such an extent that it can be 
   trusted to not do anything surprising.
 - use zfs delegation to allow the script to run as an unprivileged user
@@ -35,6 +35,9 @@ Features and ideas for znap (in not very particular order):
   every time it is run, and it destroys maximum two old snapshots at a time 
   by default.
 - have a sane default config.
+- remote replication of snapshots over ssh implemented with a separate script.
+  After sending all snapshots in the initial send, the script finds the newest 
+  snapshots on the local and remote pools and sends an incremental zfs stream.
 
 
 Unimplemented ideas
@@ -50,12 +53,15 @@ or if anyone asks nicely.
   these snapshots.
 - user logger(1) to log error conditions.
 - add cron MAILTO variable so script output can be mailed to a configurable email.
-- add a script to do remote replication with zfs send / receive
 
 
-Install
-=======
+Dependencies
+============
+- znapsend.sh depends on sudo
 
+
+Install - znap.sh and znap-hourly.sh
+====================================
 Configure and install the script
 ```
 # make install
@@ -96,8 +102,81 @@ If you need different configs per pool just copy znap.conf into
 /usr/local/etc/znap.d/ and name it after the pool, ie. tank.conf.
 
 
+Install - znapsend.sh
+=====================
+These actions should be carried out on both machines, both 
+the local and the remote.
+
+Add an unprivileged znapsend user (example from FreeBSD)
+```
+# adduser 
+Username: znapsend
+Full name: znapsend unprivileged user
+Uid (Leave empty for default): 65001    
+Login group [znapsend]: 
+Login group is znapsend. Invite znapsend into other groups? []: 
+Login class [default]: 
+Shell (sh csh tcsh nologin) [sh]: 
+Home directory [/home/znapsend]: /var/znapsend
+Home directory permissions (Leave empty for default): 
+Use password-based authentication? [yes]: no
+Lock out the account after creation? [no]:
+Username   : znapsend
+Password   : <disabled>
+Full Name  : znapsend unprivileged user
+Uid        : 65001
+Class      : 
+Groups     : znapsend 
+Home       : /var/znapsend
+Home Mode  : 
+Shell      : /bin/sh
+Locked     : no
+```
+
+Create ssh keys
+```
+# su znapsend
+$ ssh-keygen
+```
+Remember to copy each hosts znapsend public key to the others 
+./ssh/authorized_keys file.
+
+Delegate the proper rights to the znapsend user
+```
+# zfs allow -u znapsend hold,receive,release,send <pool>
+```
+
+Set up passwordless sudo for the znapsend used. Add this to 
+/usr/local/etc/sudoers
+```
+znapsend ALL=(root) NOPASSWD: /sbin/zfs receive *
+```
+
+Set up a specific config for the pool you wish to replicate.
+Just copy the znap.conf into znap.d/poolname.conf and set the
+configuration options for replication. Unless you want to run 
+as another user than znapsend you only need to set the config 
+for remote host and remote pool.
+```
+REMOTE_USER='znapsend'
+REMOTE_HOST=''
+REMOTE_POOL=''
+```
+
+Perform the initial replication (could take some time)
+```
+# su znapsend
+$ sh /usr/local/sbin/znapsend.sh <pool> initial
+```
+
+Schedule replication as often as you make new snapshots.
+This example is for hourly snapshots. Add a line to /etc/crontab.
+```
+13   *   *   *   *   znapsend /bin/sh /usr/local/sbin/znapsend.sh <poolname>
+```
+
 Supported OSes
---------------
+==============
 Currently the only supported OS is FreeBSD because its what I run it on. 
 It should be trivial to adapt it for use on other Unix platforms.
 

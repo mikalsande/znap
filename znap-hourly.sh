@@ -58,6 +58,17 @@ SNAPSHOT_NAME=${SNAPSHOT_NAME:='znap'}
 DESTROY_LIMIT=${DESTROY_LIMIT:='2'}
 
 
+#########################
+# Runtime configuration #
+#########################
+
+# find the threshold date for destroying snapshots
+HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H')"
+
+# the date and hour when the script is run
+TIME_NOW="$(date '+%Y%m%d%H')"
+
+
 #################
 # Runtime tests #
 #################
@@ -118,17 +129,6 @@ then
 fi
 
 
-#########################
-# Runtime configuration #
-#########################
-
-# find the threshold date for destroying snapshots
-HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H')"
-
-# the date and hour when the script is run
-TIME_NOW="$(date '+%Y%m%d%H')"
-
-
 ######################
 # Make new snapshots #
 ######################
@@ -158,7 +158,8 @@ do
 		exit 0
 	fi
 
-	snapshot_date=$( echo "$snapshot" | tr -d '@' | grep -o '^[[:digit:]]*' )
+	snapshot_date="${snapshot#@}"
+	snapshot_date="${snapshot_date%%_*}"
 
 	if [ "$snapshot_date" -lt "$HOURLY_DESTROY_TIME" ]
 	then

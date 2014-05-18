@@ -172,8 +172,9 @@ destroy_old ()
 			exit 0
 		fi
 
-		snapshot_date=$( echo "$snapshot" | tr -d '@' | grep -o '^[[:digit:]]*' )
-
+		snapshot_date="${snapshot#@}"
+		snapshot_date="${snapshot_date%%_*}"
+		
 		if [ "$snapshot_date" -lt "$DESTROY_DATE" ]
 		then
 			zfs destroy -d -r "${POOL}${snapshot}"

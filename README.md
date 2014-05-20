@@ -19,8 +19,8 @@ Features and ideas for znap (in not very particular order):
   snapshots which take presedence over daily snapshots.
 - snapshots are done recursively from the root of a zpool
 - creation-date is included in the snapshot name. The pattern they follow is 
-  date_scriptname_type, eg. 2014021102_znap_daily. This is both computer and 
-  human friendly. The time format is yyyymmddhh.
+  date_scriptname_type, eg. 201402110243_znap_daily. This is both computer and 
+  human friendly. The time format is yyyymmddhhmm.
 - all time related calculations are done by date(1), znap only compares integers 
   to figure out when a snapshot is too old.
 - snapshots are removed with deferred destroy to make sure the script works with 

@@ -63,10 +63,10 @@ DESTROY_LIMIT=${DESTROY_LIMIT:='2'}
 #########################
 
 # find the threshold date for destroying snapshots
-HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H')"
+HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H%M')"
 
 # the date and hour when the script is run
-TIME_NOW="$(date '+%Y%m%d%H')"
+TIME_NOW="$(date '+%Y%m%d%H%M')"
 
 
 #################

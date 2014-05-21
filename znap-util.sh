@@ -34,7 +34,7 @@ list ()
 {
 	zfs list -H -t snapshot -o name | grep "^${POOL}" \
 		| grep "_${SNAPSHOT_NAME}_" \
-		| grep --only-matching '@.*' \
+		| grep --only-matching "${POOL}@.*" \
 		| sort | uniq
 }
 

@@ -171,13 +171,13 @@ fi
 #########################
 
 # find the threshold date for destroying snapshots
-HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H')"
-DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d%H')"
-WEEKLY_DESTROY_DATE="$(date -v -${WEEKLY_LIFETIME}d '+%Y%m%d%H')"
-MONTHLY_DESTROY_DATE="$(date -v -${MONTHLY_LIFETIME}d '+%Y%m%d%H')"
+HOURLY_DESTROY_TIME="$(date -v -${HOURLY_LIFETIME}H '+%Y%m%d%H%M')"
+DAILY_DESTROY_DATE="$(date -v -${DAILY_LIFETIME}d '+%Y%m%d%H%M')"
+WEEKLY_DESTROY_DATE="$(date -v -${WEEKLY_LIFETIME}d '+%Y%m%d%H%M')"
+MONTHLY_DESTROY_DATE="$(date -v -${MONTHLY_LIFETIME}d '+%Y%m%d%H%M')"
 
 # todays date, day of week and day of month
-TODAY_DATE="$(date '+%Y%m%d%H')"
+TODAY_DATE="$(date '+%Y%m%d%H%M')"
 TODAY_DAY_OF_WEEK="$(date '+%u')"
 TODAY_DAY_OF_MONTH="$(date '+%d')"
 

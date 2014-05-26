@@ -99,13 +99,6 @@ then
 	exit 1
 fi
 
-# Skip snapshot if znap.sh has taken a snapshot this hour
-zfs list -t snapshot | grep "^$POOL" | grep "${TIME_NOW}_${SNAPSHOT_NAME}_" > /dev/null
-if [ "$?" -eq '0' ]
-then
-	exit 0
-fi
-
 # Is there a general config?
 if [ -r "$CONFIG_FILE" ]
 then

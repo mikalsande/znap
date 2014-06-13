@@ -6,15 +6,15 @@ If anyone finds this useful please tell me about it :)
 
 Features
 ========
-- Unprivileged Operation: use zfs delegation to allow the script to run as an unprivileged user.
-- Configurable: there is a global config and a per pool config. Found under znap.d directory in the config path, the configuration files are named after the pool like <pool>.conf
-- Daily Snapshots: perform daily, weekly and monthly snapshots. snapshot-lifetime is given in days. Snapshots are destroyed based on how many days they have lived, not how many snapshots there are.
-- Hourly Snapshots: perform hourly snapshots with a separate script. snapshot-lifetime is given in hours. Snapshots are destroyed based on how many hours they have lived, not how many snasphots there are.
-- Simple Name Format: creation-time is included in the snapshot name. The name pattern snapshots follow is date_scriptname_type, eg. 201402110243_znap_daily. This is both computer and human friendly. The time format is yyyymmddhhmm.
-- User Properties: znap supports marking datasets with user properties to control the retention of different types of snapshots. See the section Uer Properties below.
-- Replication: remote replication of snapshots over ssh is implemented with a separate script, znapsend.sh. After sending all snapshots in the initial send, the script finds the newest snapshots on the local and remote pools and sends an incremental zfs stream.
-- Ratelimiting: destroyal of old snapshots is limited to two per run to make sure that the script doesn't destroy too many snapshots at a time. The script takes one snapshot every time it is run, and it destroys maximum two old snapshots at a time by default.
-- Utility: has a utility script, znap-util.sh, that can showing information about znap per pool configuration, number of snapshots, which datasets have which user properties enabled and more.
+- **Unprivileged Operation**: use zfs delegation to allow the script to run as an unprivileged user.
+- **Configurable**: there is a global config and a per pool config. Found under znap.d directory in the config path, the configuration files are named after the pool like <pool>.conf
+- **Daily Snapshots**: perform daily, weekly and monthly snapshots. snapshot-lifetime is given in days. Snapshots are destroyed based on how many days they have lived, not how many snapshots there are.
+- **Hourly Snapshots**: perform hourly snapshots with a separate script. snapshot-lifetime is given in hours. Snapshots are destroyed based on how many hours they have lived, not how many snasphots there are.
+- **Simple Name Format**: creation-time is included in the snapshot name. The name pattern snapshots follow is date_scriptname_type, eg. 201402110243_znap_daily. This is both computer and human friendly. The time format is yyyymmddhhmm.
+- **User Properties**: znap supports marking datasets with user properties to control the retention of different types of snapshots. See the section Uer Properties below.
+- **Replication**: remote replication of snapshots over ssh is implemented with a separate script, znapsend.sh. After sending all snapshots in the initial send, the script finds the newest snapshots on the local and remote pools and sends an incremental zfs stream.
+- **Ratelimiting**: destroyal of old snapshots is limited to two per run to make sure that the script doesn't destroy too many snapshots at a time. The script takes one snapshot every time it is run, and it destroys maximum two old snapshots at a time by default.
+- **Utility**: has a utility script, znap-util.sh, that can showing information about znap per pool configuration, number of snapshots, which datasets have which user properties enabled and more.
 
 Design ideas
 ============
@@ -27,15 +27,22 @@ Design ideas
 - snapshots are removed with deferred destroy to make sure the script works with zfs holds.
 
 Unimplemented ideas
-===================
+-------------------
 I have some ideas for extending the script. Might implement them if I need them myself or if anyone asks nicely.
 - quarterly snapshots.
 - be able to make snapshots manually in addition to the daily ones. They could be called admin snapshots and live for a year. It would be up to the admin to destroy these snapshots.
 - user logger(1) to log error conditions.
 - add cron MAILTO variable so script output can be mailed to a configurable email.
 
+Scripts
+=======
+- **znap.sh** - performs daily, weekly and monthly snapshots 
+- **znap-hourly.sh** - performs hourly snapshots
+- **znap-util.sh** - can show information about znap configuration and other util things
+- **znapsend.sh** - performs zfs replication over ssh to a remote host
+
 Dependencies
-============
+------------
 - znapsend.sh depends on sudo for unprivileged operation.
 
 Install - znap.sh and znap-hourly.sh

@@ -145,10 +145,10 @@ for snapshot in $( zfs list -H -t snapshot -o name \
 	| grep "^${POOL}" | grep "_${SNAPSHOT_NAME}_hourly" \
 	| grep --only-matching '@.*' | sort | uniq )
 do
-	# exit if we have already destroyed enough snapshots
+	# break the loop if we have already destroyed enough snapshots
 	if [ "$destroyed" -eq "$DESTROY_LIMIT" ]
 	then
-		exit 0
+		break
 	fi
 
 	snapshot_date="${snapshot#@}"
@@ -160,6 +160,18 @@ do
 		destroyed=$(( $destroyed + 1 ))
 	fi
 done
+
+
+#######################################
+# Destroy snapshots by userproperties #
+#######################################
+
+for snapshot in $( zfs get -r -t snapshot -o name,value -H script.znap:nohourly $POOL \
+	| grep '1$' | grep "_${SNAPSHOT_NAME}_" | grep 'hourly' | cut -f1 )
+do
+	zfs destroy -d "$snapshot"
+done
+
 
 
 exit 0

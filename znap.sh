@@ -166,10 +166,10 @@ destroy_old ()
 		| grep "^${POOL}" | grep "_${SNAPSHOT_NAME}_${TYPE}" \
 		| grep --only-matching '@.*' | sort | uniq )
 	do
-		# exit if we have already destroyed enough snapshots
+		# return if we have already destroyed enough snapshots
 		if [ "$destroyed" -eq "$DESTROY_LIMIT" ]
 		then
-			exit 0
+			return
 		fi
 
 		snapshot_date="${snapshot#@}"
@@ -180,6 +180,38 @@ destroy_old ()
 			zfs destroy -d -r "${POOL}${snapshot}"
 			destroyed=$(( $destroyed + 1 ))
 		fi
+	done
+}
+
+# destroy by user properties
+destroy_properties ()
+{
+	case "$1" in
+	nosnapshots)
+		PROPERTY='script.znap:nosnapshots'
+		TYPE=''
+		;;
+	nomonthly)
+		PROPERTY='script.znap:nomonthly'
+		TYPE='monthly'
+		;;
+	noweekly)
+		PROPERTY='script.znap:noweekly'
+		TYPE='weekly'
+		;;
+	nodaily)
+		PROPERTY='script.znap:nodaily'
+		TYPE='daily'
+		;;
+	*)
+		return
+		;;	
+	esac
+
+	for snapshot in $( zfs get -r -t snapshot -o name,value -H $PROPERTY $POOL \
+		| grep '1$' | grep "_${SNAPSHOT_NAME}_" | grep "$TYPE" | cut -f1 )
+	do
+		zfs destroy -d "$snapshot"
 	done
 }
 
@@ -225,6 +257,16 @@ destroy_old 'weekly'
 
 # destroy old monthly snapshots
 destroy_old 'monthly'
+
+
+#######################################
+# Destroy snapshots by userproperties #
+#######################################
+
+destroy_properties 'nosnapshots'
+destroy_properties 'nomonthly'
+destroy_properties 'noweekly'
+destroy_properties 'nodaily'
 
 
 exit 0

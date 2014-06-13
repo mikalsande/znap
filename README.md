@@ -35,6 +35,8 @@ Features and ideas for znap (in not very particular order):
   every time it is run, and it destroys maximum two old snapshots at a time 
   by default.
 - have a sane default config.
+- supports marking datasets with user properties to control retention of types 
+  of snapshots.
 - remote replication of snapshots over ssh implemented with a separate script.
   After sending all snapshots in the initial send, the script finds the newest 
   snapshots on the local and remote pools and sends an incremental zfs stream.
@@ -173,6 +175,29 @@ Schedule replication as often as you make new snapshots.
 This example is for hourly snapshots. Add a line to /etc/crontab.
 ```
 13   *   *   *   *   znapsend /bin/sh /usr/local/sbin/znapsend.sh <poolname>
+```
+
+User properties
+===============
+
+znap supports these user properties:
+- script.znap:nosnapshots - Destroys all snapshots for the marked dataset
+- script.znap:nomonthly - Destroys monthly snapshots for the marked dataset
+- script.znap:noweekly - Destroys weekly snapshots for the marked dataset
+- script.znap:nodaily - Destroys daily snapshots for the marked dataset
+- script.znap:nohourly - Destroys hourly snapshots for the marked dataset
+
+These user properties only affect the marked datasets and it only destroys snapshots 
+taken by znap, all other snapshots are left alone.
+
+Enable a znap user property
+```
+zfs set script.znap:nohourly=1 <dataset>
+```
+
+Disable a znap user property
+```
+zfs set script.znap:nosnapshots=0 <dataset>
 ```
 
 Supported OSes

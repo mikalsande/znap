@@ -29,6 +29,20 @@ FOUND_CONFIG='no'
 # Functions #
 #############
 
+# number of snapshots
+count ()
+{
+	total_snapshots=$( zfs list -t snapshot | grep "^${POOL}" \
+		| wc -l | tr -d ' ' )
+	znap_snapshots=$( zfs list -t snapshot | grep "^${POOL}" \
+		| grep _${SNAPSHOT_NAME}_ | wc -l | tr -d ' ' )
+
+	echo
+	echo "Total snapshots: ${total_snapshots}"
+	echo "znap snapshots:  ${znap_snapshots}"
+}
+
+
 # List all toplevel znap snapshots
 list ()
 {
@@ -52,6 +66,41 @@ list_dataset ()
 {
 	zfs list -o space -S usedsnap -o name,used,usedsnap \
 		| grep "^${POOL}" | grep -v '0$'
+}
+
+
+# List datasets with script.znap properties
+list_properties ()
+{
+	# script.znap:nosnapshots
+	echo
+	echo '### script.znap:nosnapshots ###'
+	zfs get -r -t filesystem -o name,value -H script.znap:nosnapshots $POOL \
+		| grep '1$' | cut -f1
+
+	# script.znap:nomonthly
+	echo
+	echo '### script.znap:nomonthly ###'
+	zfs get -r -t filesystem -o name,value -H script.znap:nomonthly $POOL \
+		| grep '1$' |  cut -f1
+
+	# script.znap:noweekly
+	echo
+	echo '### script.znap:noweekly ###'
+	zfs get -r -t filesystem -o name,value -H script.znap:noweekly $POOL \
+		| grep '1$' |  cut -f1
+
+	# script.znap:nodaily
+	echo
+	echo '### script.znap:nodaily ###'
+	zfs get -r -t filesystem -o name,value -H script.znap:nodaily $POOL \
+		| grep '1$' |  cut -f1
+
+	# script.znap:nohourly
+	echo
+	echo '### script.znap:nohourly ###'
+	zfs get -r -t filesystem -o name,value -H script.znap:nohourly $POOL \
+		| grep '1$' |  cut -f1
 }
 
 
@@ -83,8 +132,15 @@ Weekdays (1 = monday, 7 = sunday)
 
 Name included in all snapshots: $SNAPSHOT_NAME
 
-Snapshots destroyed per run: $DESTROY_LIMIT
+Old snapshots destroyed per run: $DESTROY_LIMIT
 
+Supported user properties:
+  script.znap:nosnapshots	All znap snapshots are deleted for the destroyed
+  script.znap:nomonthly		All znap monthly snapshots are destroyed
+  script.znap:noweekly		All znap weekly snapshots are destroyed 
+  script.znap:nodaily		All znap daily snapshots are destroyed
+  script.znap:nohourly		All znap hourly snapshots are destroyed
+ 
 ssh replication config
   Username:		$REMOTE_USER
   Host:			$REMOTE_HOST
@@ -103,9 +159,11 @@ Usage: $(basename $0) <pool> <action>
 
 Actions:
   config	Show znap config
+  count		Show number of snapshots
   dataset	List datasets where snapshots contain data
 		Shows the fields name,used,usedsnap
   list		List all toplevel snapshots
+  properties	List datasets with znap properties
   uniq		List all snapshots that have unique data
 		Shows the fields name,refer,used
 
@@ -190,6 +248,9 @@ case "$ACTION" in
 config)
 	show_config
 	;;
+count)
+	count
+	;;
 dataset)
 	list_dataset
 	;;
@@ -198,6 +259,9 @@ list)
 	;;
 uniq)
 	list_unique
+	;;
+properties)
+	list_properties
 	;;
 *)
 	echo "Unrecognized action."

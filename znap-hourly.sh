@@ -133,9 +133,9 @@ SNAPSHOT="${TIME_NOW}_${SNAPSHOT_NAME}_hourly"
 zfs snapshot -r "${POOL}@${SNAPSHOT}"
 
 
-########################
-# Delete old snapshots #
-########################
+#########################
+# Destroy old snapshots #
+#########################
 
 # destroyed snapshot count
 destroyed='0'

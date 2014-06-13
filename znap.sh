@@ -242,9 +242,9 @@ SNAPSHOT="${TODAY_DATE}_${SNAPSHOT_NAME}_${SNAPSHOT_TYPE}"
 zfs snapshot -r "${POOL}@${SNAPSHOT}"
 
 
-########################
-# Delete old snapshots #
-########################
+#########################
+# Destroy old snapshots #
+#########################
 
 # destroyed snapshot count
 destroyed='0'

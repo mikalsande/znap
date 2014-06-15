@@ -38,8 +38,8 @@ count ()
 		| grep _${SNAPSHOT_NAME}_ | wc -l | tr -d ' ' )
 
 	echo
-	echo "Total snapshots: ${total_snapshots}"
 	echo "znap snapshots:  ${znap_snapshots}"
+	echo "Total snapshots: ${total_snapshots}"
 }
 
 
